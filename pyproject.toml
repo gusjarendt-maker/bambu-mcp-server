@@ -13,6 +13,10 @@ authors = [
     { name = "gusjarendt-maker" },
     { name = "ciroarendt" },
 ]
+
+[project.urls]
+Homepage = "https://github.com/gusjarendt-maker/bambu-mcp-server"
+"Built with" = "https://www.codrsync.dev"
 dependencies = [
     "mcp>=1.0.0",
     "trimesh>=4.0.0",
