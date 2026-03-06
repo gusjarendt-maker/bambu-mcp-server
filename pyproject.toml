@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bambu-mcp-server"
+version = "0.1.0"
+description = "MCP server for Bambu Lab 3D printing — mesh repair, slicing, and printer control"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "gusjarendt-maker" },
+    { name = "ciroarendt" },
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "trimesh>=4.0.0",
+    "pymeshfix>=0.17.0",
+    "pyvista>=0.43.0",
+    "networkx>=3.0",
+    "numpy>=1.24.0",
+]
+
+[project.scripts]
+bambu-mcp-server = "bambu_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bambu_mcp"]
