@@ -9,6 +9,7 @@ import json
 from mcp.server.fastmcp import FastMCP
 
 from bambu_mcp.tools import mesh
+from bambu_mcp.tools import slicer
 
 server = FastMCP(
     "bambu-mcp-server",
@@ -154,6 +155,113 @@ def mesh_calculate_scale(
         target_length_mm=target_length_mm,
         clearance_pct=clearance_pct,
     )
+    return json.dumps(result, indent=2)
+
+
+# ── Slicer Tools ───────────────────────────────────────────────────────
+
+
+@server.tool()
+def slicer_detect() -> str:
+    """Detect Bambu Studio installation, version, and profile locations.
+
+    Returns installation status, CLI path, version, and profile directories.
+    """
+    result = slicer.detect()
+    return json.dumps(result, indent=2)
+
+
+@server.tool()
+def slicer_list_profiles(
+    profile_type: str = "all",
+    vendor: str = "BBL",
+    include_user: bool = True,
+) -> str:
+    """List available printing profiles (machine, filament, process).
+
+    Args:
+        profile_type: Type of profiles — "machine", "filament", "process", or "all".
+        vendor: Vendor filter (default "BBL" for Bambu Lab). Use "all" for all vendors.
+        include_user: Whether to include user-created profiles.
+    """
+    result = slicer.list_profiles(profile_type, vendor, include_user)
+    return json.dumps(result, indent=2)
+
+
+@server.tool()
+def slicer_slice(
+    file_path: str,
+    machine_profile: str | None = None,
+    filament_profile: str | None = None,
+    process_profile: str | None = None,
+    output_dir: str | None = None,
+    plate: int = 0,
+    enable_timelapse: bool = False,
+) -> str:
+    """Slice a 3D model (STL/3MF) to G-code using Bambu Studio CLI.
+
+    Requires Bambu Studio installed. Use slicer_detect to verify installation
+    and slicer_list_profiles to find available profiles.
+
+    Args:
+        file_path: Absolute path to the STL or 3MF file.
+        machine_profile: Path to machine settings JSON, or None for default.
+        filament_profile: Path to filament settings JSON, or None for default.
+        process_profile: Path to process settings JSON, or None for default.
+        output_dir: Directory for output files. Defaults to same directory as input.
+        plate: Plate index to slice (0 = all plates).
+        enable_timelapse: Enable timelapse for this slice.
+    """
+    result = slicer.slice_model(
+        file_path,
+        machine_profile=machine_profile,
+        filament_profile=filament_profile,
+        process_profile=process_profile,
+        output_dir=output_dir,
+        plate=plate,
+        enable_timelapse=enable_timelapse,
+    )
+    return json.dumps(result, indent=2)
+
+
+@server.tool()
+def slicer_export_3mf(
+    file_path: str,
+    output_path: str | None = None,
+    machine_profile: str | None = None,
+    filament_profile: str | None = None,
+    process_profile: str | None = None,
+) -> str:
+    """Export/package a model as 3MF with embedded print settings.
+
+    Creates a 3MF file that can be opened in Bambu Studio or sent directly
+    to a Bambu Lab printer.
+
+    Args:
+        file_path: Absolute path to the STL or 3MF file.
+        output_path: Output 3MF path. Defaults to <name>.3mf in the same directory.
+        machine_profile: Path to machine settings JSON.
+        filament_profile: Path to filament settings JSON.
+        process_profile: Path to process settings JSON.
+    """
+    result = slicer.export_3mf(
+        file_path,
+        output_path=output_path,
+        machine_profile=machine_profile,
+        filament_profile=filament_profile,
+        process_profile=process_profile,
+    )
+    return json.dumps(result, indent=2)
+
+
+@server.tool()
+def slicer_model_info(file_path: str) -> str:
+    """Get model information from Bambu Studio CLI (dimensions, printability).
+
+    Args:
+        file_path: Absolute path to the STL or 3MF file.
+    """
+    result = slicer.model_info(file_path)
     return json.dumps(result, indent=2)
 
 
